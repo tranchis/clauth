@@ -58,7 +58,8 @@
 (defn auth-codes
   "Sequence of auth-codes"
   []
-  (map oauth-code (store/entries @auth-code-store)))
+  (sort-by #(- (.getTime (:expires %)))
+           (map oauth-code (store/entries @auth-code-store))))
 
 (defn create-auth-code
   "create a unique auth-code and store it in the auth-code store"

@@ -118,11 +118,12 @@
    (client-authenticated-request
     req
     client-authenticator
-    (fn [req client] (if-let [user (user-authenticator
-                                    ((req :params) :username)
-                                    ((req :params) :password))]
-                       (respond-with-new-token token-creator client user)
-                       (error-response "invalid_grant")))))
+    (fn [req client]
+      (if-let [user (user-authenticator
+                     ((req :params) :username)
+                     ((req :params) :password))]
+        (respond-with-new-token token-creator client user)
+        (error-response "invalid_grant")))))
 
  (defmethod token-request-handler :default [req _]
    (error-response "unsupported_grant_type"))

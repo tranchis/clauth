@@ -54,7 +54,7 @@
                                            (:client-secret client)))))}})
            {:status 200
             :headers {"Content-Type" "application/json"}
-            :body (str "{\"access_token\":\"" (:token (first (tokens)))
+            :body (str "{\"access_token\":\"" (:token (last (tokens)))
                        "\",\"token_type\":\"bearer\"}")})
         "basic authenticated client credentials")
 
@@ -104,7 +104,7 @@
                                                  (:client-secret client)))))}})
            {:status 200
             :headers {"Content-Type" "application/json"}
-            :body (str "{\"access_token\":\"" (:token (first (tokens)))
+            :body (str "{\"access_token\":\"" (:token (last (tokens)))
                        "\",\"token_type\":\"bearer\"}")})
         "basic authenticated client credentials")
 
@@ -182,7 +182,7 @@
                                                     client)))))}})
              {:status 200
               :headers {"Content-Type" "application/json"}
-              :body (str "{\"access_token\":\"" (:token (first (tokens)))
+              :body (str "{\"access_token\":\"" (:token (last (tokens)))
                          "\",\"token_type\":\"bearer\"}")})
           "basic authenticated client credentials"))
 
@@ -309,7 +309,7 @@
           auth-code (fetch-auth-code code_string)]
       (is (= (response :status) 302))
       (is (= post_auth_redirect_uri
-             (str "http://test.com?state=abcde&code=" code_string))
+             (str "http://test.com?code=" code_string "&state=abcde"))
           "should redirect with proper format")
       (is (= (:client auth-code) client) "should properly set client")
       (is (= (:subject auth-code) user) "should properly set subject")
@@ -325,7 +325,7 @@
                              :session {:access_token (:token session_token)}})]
       (is (= (response :status) 302))
       (is (= (response :headers)
-             {"Location" "http://test.com?state=abcde&error=invalid_request"})))
+             {"Location" "http://test.com?error=invalid_request&state=abcde"})))
 
     (let [session_token (create-token client user)
           response (handler {:request-method :get
@@ -335,7 +335,7 @@
                              :session {:access_token (:token session_token)}})]
       (is (= (response :status) 302))
       (is (= (response :headers)
-             {"Location" "http://test.com?state=abcde&error=invalid_request"})
+             {"Location" "http://test.com?error=invalid_request&state=abcde"})
           "should redirect with error in query"))
 
     (let [session_token (create-token client user)
@@ -358,7 +358,7 @@
       (is (= (response :status) 302))
       (is (= (response :headers)
              {"Location"
-              "http://test.com?state=abcde&error=unsupported_response_type"})
+              "http://test.com?error=unsupported_response_type&state=abcde"})
           "should return error on unsupported response type"))
 
       (let [session_token (create-token client user)
@@ -371,7 +371,7 @@
       (is (= (response :status) 302))
       (is (= (response :headers)
              {"Location"
-              "http://test.com#state=abcde&error=unsupported_response_type"})
+              "http://test.com#error=unsupported_response_type&state=abcde"})
           "should return error on unsupported response type"))
 
     (let [session_token (create-token client user)
@@ -387,7 +387,7 @@
           auth-code (fetch-auth-code code_string)]
       (is (= (response :status) 302))
       (is (= post_auth_redirect_uri
-             (str "http://test.com?state=abcde&code=" code_string))
+             (str "http://test.com?code=" code_string "&state=abcde"))
           "should redirect with proper format")
       (is (= (:client auth-code) client) "should properly set client")
       (is (= (:subject auth-code) user) "should properly set subject")
@@ -438,7 +438,7 @@
                              :session {:access_token (:token session_token)}})]
       (is (= (response :status) 302))
       (is (= (response :headers)
-             {"Location" "http://test.com?state=abcde&error=invalid_request"})))
+             {"Location" "http://test.com?error=invalid_request&state=abcde"})))
 
     (let [session_token (create-token client user)
           response (handler {:request-method :get
@@ -448,7 +448,7 @@
                              :session {:access_token (:token session_token)}})]
       (is (= (response :status) 302))
       (is (= (response :headers)
-             {"Location" "http://test.com#state=abcde&error=invalid_request"})
+             {"Location" "http://test.com#error=invalid_request&state=abcde"})
           "should redirect with error in fragment"))
 
     (let [session_token (create-token client user)
@@ -471,7 +471,7 @@
       (is (= (response :status) 302))
       (is (= (response :headers)
              {"Location"
-              "http://test.com?state=abcde&error=unsupported_response_type"})
+              "http://test.com?error=unsupported_response_type&state=abcde"})
           "should return error on unsupported response type"))
 
     (let [session_token (create-token client user)
@@ -486,8 +486,8 @@
           token_string (last (re-find #"access_token=([^&]+)" redirect_uri))
           token (fetch-token token_string)]
       (is (= (response :status) 302))
-      (is (= redirect_uri (str "http://test.com#state=abcde&access_token="
-                               token_string "&token_type=bearer"))
+      (is (= redirect_uri (str "http://test.com#access_token=" token_string
+                               "&token_type=bearer&state=abcde"))
           "should redirect with proper format")
       (is (= (:client token) client) "should properly set client")
       (is (= (:subject token) user) "should properly set subject"))))
